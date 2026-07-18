@@ -1,5 +1,6 @@
 'use strict';
 
+const clockEl = document.getElementById('clock');
 const stopInput = document.getElementById('stopInput');
 const suggestions = document.getElementById('suggestions');
 const routePillsContainer = document.getElementById('routePills');
@@ -17,8 +18,34 @@ const TYPE_ICONS = {
 
 let debounceTimer;
 let currentDepartures = [];
+let routeMetadata = new Map();
 let selectedRoutes = new Set();
 
+// --- Clock Logic ---
+function updateClock() {
+    const now = new Date();
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+    
+    const dayName = days[now.getDay()];
+    const monthName = months[now.getMonth()];
+    const date = now.getDate();
+    const year = now.getFullYear();
+    const time = now.toTimeString().split(' ')[0];
+
+    // Ordinal suffix logic
+    let suffix = 'th';
+    if (date % 10 === 1 && date !== 11) suffix = 'st';
+    else if (date % 10 === 2 && date !== 12) suffix = 'nd';
+    else if (date % 10 === 3 && date !== 13) suffix = 'rd';
+
+    clockEl.textContent = `${dayName}, ${date}${suffix} of ${monthName} ${year}, ${time}`;
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
+// --- Search Logic ---
 stopInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     const query = stopInput.value.trim();
@@ -32,12 +59,6 @@ stopInput.addEventListener('input', () => {
         renderSuggestions(data);
     }, 300);
 });
-
-clearFilterBtn.onclick = () => {
-    selectedRoutes.clear();
-    renderRoutePills();
-    renderBoard();
-};
 
 function renderSuggestions(stops) {
     suggestions.innerHTML = '';
@@ -63,28 +84,48 @@ function renderSuggestions(stops) {
 async function fetchDepartures(stopName) {
     const response = await fetch(`/api/departures?stop_name=${encodeURIComponent(stopName)}`);
     currentDepartures = await response.json();
+    
+    // Build metadata map for colors
+    routeMetadata.clear();
+    currentDepartures.forEach(d => {
+        if (!routeMetadata.has(d.route)) {
+            routeMetadata.set(d.route, { color: d.color, text: d.text_color });
+        }
+    });
+
     renderRoutePills();
     renderBoard();
 }
 
+// --- Filter Logic ---
+clearFilterBtn.onclick = () => {
+    selectedRoutes.clear();
+    renderRoutePills();
+    renderBoard();
+};
+
 function renderRoutePills() {
     routePillsContainer.innerHTML = '';
-    
-    // Extract unique route names from departures
-    const routes = [...new Set(currentDepartures.map(d => d.route))].sort((a, b) => {
-        return a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'});
-    });
+    const sortedRoutes = [...routeMetadata.keys()].sort((a, b) => 
+        a.localeCompare(b, undefined, {numeric: true, sensitivity: 'base'})
+    );
 
-    routes.forEach(route => {
+    sortedRoutes.forEach(route => {
         const pill = document.createElement('div');
-        pill.className = `filter-pill ${selectedRoutes.has(route) ? 'active' : ''}`;
+        pill.className = 'filter-pill';
         pill.textContent = route;
+        
+        const isSelected = selectedRoutes.has(route);
+        if (isSelected) {
+            const meta = routeMetadata.get(route);
+            pill.style.backgroundColor = `#${meta.color}`;
+            pill.style.color = `#${meta.text}`;
+            pill.style.fontWeight = 'bold';
+        }
+
         pill.onclick = () => {
-            if (selectedRoutes.has(route)) {
-                selectedRoutes.delete(route);
-            } else {
-                selectedRoutes.add(route);
-            }
+            if (selectedRoutes.has(route)) selectedRoutes.delete(route);
+            else selectedRoutes.add(route);
             renderRoutePills();
             renderBoard();
         };
@@ -94,14 +135,12 @@ function renderRoutePills() {
     clearFilterBtn.style.display = selectedRoutes.size > 0 ? 'block' : 'none';
 }
 
+// --- Board Logic ---
 function renderBoard() {
     board.innerHTML = '';
     
     const filtered = currentDepartures
-        .filter(dep => {
-            if (selectedRoutes.size === 0) return true;
-            return selectedRoutes.has(dep.route);
-        })
+        .filter(dep => selectedRoutes.size === 0 || selectedRoutes.has(dep.route))
         .sort((a, b) => a.minutes_left - b.minutes_left);
 
     filtered.forEach(dep => {
@@ -109,7 +148,7 @@ function renderBoard() {
         row.className = 'departure-row';
         
         const icon = TYPE_ICONS[dep.type_code] || '🚌';
-        const platformHtml = dep.platform !== 'N/A' ? `<div class='platform-label'>P: ${dep.platform}</div>` : '';
+        const headsignText = dep.platform !== 'N/A' ? `${dep.headsign} (Pt. ${dep.platform})` : dep.headsign;
         const waitTime = dep.minutes_left === 0 ? 'now' : `${dep.minutes_left}<span class='time-unit'>min</span>`;
         
         row.innerHTML = `
@@ -118,9 +157,8 @@ function renderBoard() {
                 <div class='route-pill' style='background-color: #${dep.color}; color: #${dep.text_color};'>
                     ${dep.route}
                 </div>
-                ${platformHtml}
             </div>
-            <div class='headsign'>${dep.headsign}</div>
+            <div class='headsign'>${headsignText}</div>
             <div class='time'>${waitTime}</div>
         `;
         board.appendChild(row);
