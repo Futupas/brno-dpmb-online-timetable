@@ -81,3 +81,10 @@ All datasets can be found on [data.brno.cz](https://data.brno.cz/search?collecti
 
 ## License
 Licensed under the MIT License. See `license` file for details.
+
+## ToDo
+* Get variables from `os.environ.get`
+* Save last used stops (on FE side)
+* Light theme
+* Description on the website
+* Real-time delays
