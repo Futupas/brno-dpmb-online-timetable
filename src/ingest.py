@@ -40,8 +40,11 @@ def ingest():
     trips = pd.read_csv(os.path.join(gtfs_dir, 'trips.txt'), dtype=str)
     trips.to_sql('trips', conn, if_exists='replace', index=False)
 
-    print('Loading stop_times...')
+    print('Loading stop_times (with time padding)...')
     stop_times = pd.read_csv(os.path.join(gtfs_dir, 'stop_times.txt'), dtype=str)
+    # zfill(8) converts '8:51:00' to '08:51:00' but leaves '10:51:00' and '25:30:00' untouched
+    if 'departure_time' in stop_times.columns:
+        stop_times['departure_time'] = stop_times['departure_time'].str.zfill(8)
     stop_times.to_sql('stop_times', conn, if_exists='replace', index=False)
 
     print('Loading calendar...')
@@ -61,6 +64,7 @@ def ingest():
     cursor.execute('CREATE INDEX idx_stops_name_norm ON stops(stop_name_normalized);')
     cursor.execute('CREATE INDEX idx_stop_times_stop_id ON stop_times(stop_id);')
     cursor.execute('CREATE INDEX idx_stop_times_trip_id ON stop_times(trip_id);')
+    cursor.execute('CREATE INDEX idx_stop_times_departure_time ON stop_times(departure_time);')
     cursor.execute('CREATE INDEX idx_trips_trip_id ON trips(trip_id);')
     cursor.execute('CREATE INDEX idx_trips_route_id ON trips(route_id);')
     cursor.execute('CREATE INDEX idx_trips_service_id ON trips(service_id);')
