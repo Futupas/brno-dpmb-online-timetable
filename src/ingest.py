@@ -4,11 +4,22 @@ from unidecode import unidecode
 import os
 import sys
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-data_dir = os.path.join(script_dir, '..', 'data')
-gtfs_dir = os.path.join(data_dir, 'GTFS')
-db_path = os.path.join(data_dir, 'transit.db')
-stops_file = os.path.join(data_dir, 'stops.csv')
+# =============================================================================
+# CONSTANTS
+# =============================================================================
+
+# Relative paths
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(SCRIPT_DIR, '..', 'data')
+GTFS_DIR = os.path.join(DATA_DIR, 'GTFS')
+DB_PATH = os.path.join(DATA_DIR, 'transit.db')
+STOPS_FILE = os.path.join(DATA_DIR, 'stops.csv')
+
+# IDS JMK Zone IDs for Brno city
+BRNO_ZONE_IDS = ['100', '101']
+
+# Padding length for HH:MM:SS
+GTFS_TIME_LEN = 8
 
 def normalize_string(s):
     if pd.isna(s):
@@ -16,61 +27,63 @@ def normalize_string(s):
     return unidecode(str(s)).lower()
 
 def ingest():
-    if not os.path.exists(gtfs_dir):
-        print('Error: Directory not found - ' + gtfs_dir)
+    if not os.path.exists(GTFS_DIR):
+        print('Error: GTFS directory not found: ' + GTFS_DIR)
         sys.exit(1)
         
-    if not os.path.exists(stops_file):
-        print('Error: Stops file not found - ' + stops_file)
+    if not os.path.exists(STOPS_FILE):
+        print('Error: Stops file not found: ' + STOPS_FILE)
         sys.exit(1)
 
-    os.makedirs(data_dir, exist_ok=True)
-    conn = sqlite3.connect(db_path)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH)
 
-    print('Loading stops...')
-    stops = pd.read_csv(stops_file, dtype=str)
-    stops['stop_name_normalized'] = stops['stop_name'].apply(normalize_string)
-    stops.to_sql('stops', conn, if_exists='replace', index=False)
+    print('Loading and filtering Brno stops...')
+    stops = pd.read_csv(STOPS_FILE, dtype=str)
+    # Only keep stops belonging to Brno city zones
+    brno_stops = stops[stops['zone_id'].isin(BRNO_ZONE_IDS)].copy()
+    brno_stops['stop_name_normalized'] = brno_stops['stop_name'].apply(normalize_string)
+    brno_stops.to_sql('stops', conn, if_exists='replace', index=False)
+
+    # Get list of stop_ids to filter stop_times later (reduces DB size significantly)
+    valid_stop_ids = set(brno_stops['stop_id'].unique())
 
     print('Loading routes...')
-    routes = pd.read_csv(os.path.join(gtfs_dir, 'routes.txt'), dtype=str)
+    routes = pd.read_csv(os.path.join(GTFS_DIR, 'routes.txt'), dtype=str)
     routes.to_sql('routes', conn, if_exists='replace', index=False)
 
     print('Loading trips...')
-    trips = pd.read_csv(os.path.join(gtfs_dir, 'trips.txt'), dtype=str)
+    trips = pd.read_csv(os.path.join(GTFS_DIR, 'trips.txt'), dtype=str)
     trips.to_sql('trips', conn, if_exists='replace', index=False)
 
-    print('Loading stop_times (with time padding)...')
-    stop_times = pd.read_csv(os.path.join(gtfs_dir, 'stop_times.txt'), dtype=str)
-    # zfill(8) converts '8:51:00' to '08:51:00' but leaves '10:51:00' and '25:30:00' untouched
-    if 'departure_time' in stop_times.columns:
-        stop_times['departure_time'] = stop_times['departure_time'].str.zfill(8)
-    stop_times.to_sql('stop_times', conn, if_exists='replace', index=False)
+    print('Loading stop_times (with padding and Brno filter)...')
+    # We use a chunked approach to save memory on large datasets
+    chunksize = 100000
+    first_chunk = True
+    for chunk in pd.read_csv(os.path.join(GTFS_DIR, 'stop_times.txt'), dtype=str, chunksize=chunksize):
+        # Filter only for Brno stops
+        filtered_chunk = chunk[chunk['stop_id'].isin(valid_stop_ids)].copy()
+        if not filtered_chunk.empty:
+            filtered_chunk['departure_time'] = filtered_chunk['departure_time'].str.zfill(GTFS_TIME_LEN)
+            filtered_chunk.to_sql('stop_times', conn, if_exists='replace' if first_chunk else 'append', index=False)
+            first_chunk = False
 
     print('Loading calendar...')
-    calendar_path = os.path.join(gtfs_dir, 'calendar.txt')
-    if os.path.exists(calendar_path):
-        calendar = pd.read_csv(calendar_path, dtype=str)
-        calendar.to_sql('calendar', conn, if_exists='replace', index=False)
-
-    print('Loading calendar_dates...')
-    calendar_dates_path = os.path.join(gtfs_dir, 'calendar_dates.txt')
-    if os.path.exists(calendar_dates_path):
-        calendar_dates = pd.read_csv(calendar_dates_path, dtype=str)
-        calendar_dates.to_sql('calendar_dates', conn, if_exists='replace', index=False)
+    for filename in ['calendar.txt', 'calendar_dates.txt']:
+        path = os.path.join(GTFS_DIR, filename)
+        if os.path.exists(path):
+            df = pd.read_csv(path, dtype=str)
+            df.to_sql(filename.replace('.txt', ''), conn, if_exists='replace', index=False)
 
     print('Creating indexes...')
     cursor = conn.cursor()
     cursor.execute('CREATE INDEX idx_stops_name_norm ON stops(stop_name_normalized);')
     cursor.execute('CREATE INDEX idx_stop_times_stop_id ON stop_times(stop_id);')
-    cursor.execute('CREATE INDEX idx_stop_times_trip_id ON stop_times(trip_id);')
     cursor.execute('CREATE INDEX idx_stop_times_departure_time ON stop_times(departure_time);')
     cursor.execute('CREATE INDEX idx_trips_trip_id ON trips(trip_id);')
-    cursor.execute('CREATE INDEX idx_trips_route_id ON trips(route_id);')
-    cursor.execute('CREATE INDEX idx_trips_service_id ON trips(service_id);')
     conn.commit()
     conn.close()
-    print('Done. Database created at ' + db_path)
+    print('Done. Database created at ' + DB_PATH)
 
 if __name__ == '__main__':
     ingest()
