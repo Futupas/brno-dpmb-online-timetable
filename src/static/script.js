@@ -7,13 +7,26 @@ const routePillsContainer = document.getElementById('routePills');
 const clearFilterBtn = document.getElementById('clearFilter');
 const board = document.getElementById('board');
 
-const TYPE_ICONS = {
-    '0': '🚋',
-    '3': '🚌',
-    '11': '🚎',
-    '800': '🚎',
-    '2': '🚆',
-    '109': '🚆'
+// Phosphor Icons - Regular weight (modern and clear)
+const ICONS = {
+    TRAM: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><path d='M80,216l-32,16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M176,216l32,16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M56,216H200a16,16,0,0,0,16-16V56a16,16,0,0,0-16-16H56A16,16,0,0,0,40,56V200A16,16,0,0,0,56,216Z' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='40' y1='152' x2='216' y2='152' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='128' y1='40' x2='128' y2='12' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><circle cx='84' cy='184' r='12'/><circle cx='172' cy='184' r='12'/><line x1='80' y1='88' x2='176' y2='88' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`,
+    
+    BUS: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><rect x='40' y='40' width='176' height='152' rx='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='40' y1='136' x2='216' y2='136' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M80,192v24a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8V192' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M208,192v24a8,8,0,0,1-8,8H184a8,8,0,0,1-8-8V192' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><circle cx='80' cy='164' r='12'/><circle cx='176' cy='164' r='12'/><line x1='80' y1='80' x2='176' y2='80' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`,
+    
+    TROLLEYBUS: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><rect x='40' y='72' width='176' height='144' rx='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='40' y1='144' x2='216' y2='144' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='128' y1='72' x2='80' y2='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='128' y1='72' x2='176' y2='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><circle cx='80' cy='180' r='12'/><circle cx='176' cy='180' r='12'/></svg>`,
+    
+    TRAIN: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><path d='M12,136c0-64,48-88,116-88s116,24,116,88' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><rect x='16' y='160' width='224' height='48' rx='8' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M16,160l32-72' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M240,160l-32-72' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='104' y1='80' x2='152' y2='80' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`,
+    
+    OTHER: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><circle cx='128' cy='128' r='96' fill='none' stroke='currentColor' stroke-miterlimit='10' stroke-width='16'/><polyline points='92 128 116 152 164 104' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`
+};
+
+const TYPE_TO_ICON = {
+    '0': ICONS.TRAM,
+    '3': ICONS.BUS,
+    '11': ICONS.TROLLEYBUS,
+    '800': ICONS.TROLLEYBUS,
+    '2': ICONS.TRAIN,
+    '109': ICONS.TRAIN
 };
 
 let debounceTimer;
@@ -21,8 +34,7 @@ let currentDepartures = [];
 let routeMetadata = new Map();
 let selectedRoutes = new Set();
 
-// --- Clock Logic ---
-function updateClock() {
+function formatUpdateTime() {
     const now = new Date();
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -33,19 +45,14 @@ function updateClock() {
     const year = now.getFullYear();
     const time = now.toTimeString().split(' ')[0];
 
-    // Ordinal suffix logic
     let suffix = 'th';
     if (date % 10 === 1 && date !== 11) suffix = 'st';
     else if (date % 10 === 2 && date !== 12) suffix = 'nd';
     else if (date % 10 === 3 && date !== 13) suffix = 'rd';
 
-    clockEl.textContent = `${dayName}, ${date}${suffix} of ${monthName} ${year}, ${time}`;
+    return `Actual for: ${dayName}, ${date}${suffix} of ${monthName} ${year}, ${time}`;
 }
 
-setInterval(updateClock, 1000);
-updateClock();
-
-// --- Search Logic ---
 stopInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     const query = stopInput.value.trim();
@@ -85,7 +92,9 @@ async function fetchDepartures(stopName) {
     const response = await fetch(`/api/departures?stop_name=${encodeURIComponent(stopName)}`);
     currentDepartures = await response.json();
     
-    // Build metadata map for colors
+    // Update clock only when data is fetched
+    clockEl.textContent = formatUpdateTime();
+
     routeMetadata.clear();
     currentDepartures.forEach(d => {
         if (!routeMetadata.has(d.route)) {
@@ -97,7 +106,6 @@ async function fetchDepartures(stopName) {
     renderBoard();
 }
 
-// --- Filter Logic ---
 clearFilterBtn.onclick = () => {
     selectedRoutes.clear();
     renderRoutePills();
@@ -115,8 +123,7 @@ function renderRoutePills() {
         pill.className = 'filter-pill';
         pill.textContent = route;
         
-        const isSelected = selectedRoutes.has(route);
-        if (isSelected) {
+        if (selectedRoutes.has(route)) {
             const meta = routeMetadata.get(route);
             pill.style.backgroundColor = `#${meta.color}`;
             pill.style.color = `#${meta.text}`;
@@ -135,7 +142,6 @@ function renderRoutePills() {
     clearFilterBtn.style.display = selectedRoutes.size > 0 ? 'block' : 'none';
 }
 
-// --- Board Logic ---
 function renderBoard() {
     board.innerHTML = '';
     
@@ -147,12 +153,12 @@ function renderBoard() {
         const row = document.createElement('div');
         row.className = 'departure-row';
         
-        const icon = TYPE_ICONS[dep.type_code] || '🚌';
+        const iconSvg = TYPE_TO_ICON[dep.type_code] || ICONS.OTHER;
         const headsignText = dep.platform !== 'N/A' ? `${dep.headsign} (Pt. ${dep.platform})` : dep.headsign;
         const waitTime = dep.minutes_left === 0 ? 'now' : `${dep.minutes_left}<span class='time-unit'>min</span>`;
         
         row.innerHTML = `
-            <div class='type-icon'>${icon}</div>
+            <div class='type-icon'>${iconSvg}</div>
             <div class='route-container'>
                 <div class='route-pill' style='background-color: #${dep.color}; color: #${dep.text_color};'>
                     ${dep.route}
