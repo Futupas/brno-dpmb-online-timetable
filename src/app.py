@@ -9,14 +9,9 @@ from flask import Flask, request, jsonify
 # CONSTANTS
 # =============================================================================
 
-TZ_NAME_CZECHIA = 'Europe/Prague'
-HOURS_PER_DAY = 24
-MINUTES_PER_HOUR = 60
-
-# --- Server Constants ---
 # Set to True to allow access from other devices on your network (0.0.0.0)
 # Set to False to allow only local access (127.0.0.1)
-RUN_GLOBALLY = True 
+RUN_GLOBALLY = False
 PORT_HTTP_SERVER = 5000
 
 # Max time in the future to show departures (2 hours)
@@ -24,6 +19,14 @@ MAX_DEPARTURE_WINDOW_MINUTES = 120
 
 # How many departures to show for the same route+headsign+platform combo
 DEPARTURES_PER_ROUTE_LIMIT = 2
+
+# =============================================================================
+# SYSTEM CONSTANTS
+# =============================================================================
+
+TZ_NAME_CZECHIA = 'Europe/Prague'
+HOURS_PER_DAY = 24
+MINUTES_PER_HOUR = 60
 
 # Mapping GTFS route_type to human readable strings
 ROUTE_TYPE_MAP = {
@@ -180,5 +183,7 @@ def departures():
     return jsonify(final)
 
 if __name__ == '__main__':
+    if (os.environ.get('IS_DOCKER', 'False').lower() == 'true'): RUN_GLOBALLY = True
+
     host_addr = '0.0.0.0' if RUN_GLOBALLY else '127.0.0.1'
     app.run(debug=True, host=host_addr, port=PORT_HTTP_SERVER)

@@ -149,6 +149,7 @@ input[type='text'] {
 .time-unit {
     font-size: 12px;
     color: #888;
+    padding-left: 2px;
 }
 
 .suggestion-item.highlighted {
