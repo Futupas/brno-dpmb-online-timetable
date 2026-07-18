@@ -88,3 +88,4 @@ Licensed under the MIT License. See `license` file for details.
 * Light theme
 * Description on the website
 * Real-time delays
+* When no results (try bad route on the hash) - write that there are no results
