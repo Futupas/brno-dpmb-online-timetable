@@ -12,7 +12,7 @@ from flask import Flask, request, jsonify
 # Set to True to allow access from other devices on your network (0.0.0.0)
 # Set to False to allow only local access (127.0.0.1)
 RUN_GLOBALLY = False
-PORT_HTTP_SERVER = 5000
+PORT_HTTP_SERVER = 80
 
 # Max time in the future to show departures (2 hours)
 MAX_DEPARTURE_WINDOW_MINUTES = 120
