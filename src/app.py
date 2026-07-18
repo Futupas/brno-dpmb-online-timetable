@@ -13,6 +13,7 @@ from flask import Flask, request, jsonify
 # Set to False to allow only local access (127.0.0.1)
 RUN_GLOBALLY = False
 PORT_HTTP_SERVER = 5000
+FLASK_DEBUG_MODE = True
 
 # Max time in the future to show departures (2 hours)
 MAX_DEPARTURE_WINDOW_MINUTES = 120
@@ -186,4 +187,4 @@ if __name__ == '__main__':
     if (os.environ.get('IS_DOCKER', 'False').lower() == 'true'): RUN_GLOBALLY = True
 
     host_addr = '0.0.0.0' if RUN_GLOBALLY else '127.0.0.1'
-    app.run(debug=True, host=host_addr, port=PORT_HTTP_SERVER)
+    app.run(debug=FLASK_DEBUG_MODE, host=host_addr, port=PORT_HTTP_SERVER)
