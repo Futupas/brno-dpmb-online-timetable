@@ -150,3 +150,12 @@ input[type='text'] {
     font-size: 12px;
     color: #888;
 }
+
+.suggestion-item.highlighted {
+    background: #333;
+}
+
+/* Ensure suggestions are not selectable by mouse to avoid focus conflicts */
+.suggestion-item {
+    user-select: none;
+}

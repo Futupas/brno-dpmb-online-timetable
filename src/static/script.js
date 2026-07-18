@@ -8,20 +8,14 @@ const routePillsContainer = document.getElementById('routePills');
 const clearFilterBtn = document.getElementById('clearFilter');
 const board = document.getElementById('board');
 
-
-// Phosphor Icons - Regular weight (modern and clear)
+// Minimalistic SVG paths
 const ICONS = {
-    TRAM: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><path d='M80,216l-32,16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M176,216l32,16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M56,216H200a16,16,0,0,0,16-16V56a16,16,0,0,0-16-16H56A16,16,0,0,0,40,56V200A16,16,0,0,0,56,216Z' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='40' y1='152' x2='216' y2='152' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='128' y1='40' x2='128' y2='12' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><circle cx='84' cy='184' r='12'/><circle cx='172' cy='184' r='12'/><line x1='80' y1='88' x2='176' y2='88' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`,
-    
-    BUS: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><rect x='40' y='40' width='176' height='152' rx='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='40' y1='136' x2='216' y2='136' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M80,192v24a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8V192' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M208,192v24a8,8,0,0,1-8,8H184a8,8,0,0,1-8-8V192' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><circle cx='80' cy='164' r='12'/><circle cx='176' cy='164' r='12'/><line x1='80' y1='80' x2='176' y2='80' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`,
-    
-    TROLLEYBUS: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><rect x='40' y='72' width='176' height='144' rx='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='40' y1='144' x2='216' y2='144' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='128' y1='72' x2='80' y2='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='128' y1='72' x2='176' y2='16' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><circle cx='80' cy='180' r='12'/><circle cx='176' cy='180' r='12'/></svg>`,
-    
-    TRAIN: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><path d='M12,136c0-64,48-88,116-88s116,24,116,88' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><rect x='16' y='160' width='224' height='48' rx='8' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M16,160l32-72' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><path d='M240,160l-32-72' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/><line x1='104' y1='80' x2='152' y2='80' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`,
-    
-    OTHER: `<svg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'><rect width='256' height='256' fill='none'/><circle cx='128' cy='128' r='96' fill='none' stroke='currentColor' stroke-miterlimit='10' stroke-width='16'/><polyline points='92 128 116 152 164 104' fill='none' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round' stroke-width='16'/></svg>`
+    TRAM: `<svg viewBox='0 0 256 256'><rect width='256' height='256' fill='none'/><path d='M80,216l-32,16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M176,216l32,16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M56,216H200a16,16,0,0,0,16-16V56a16,16,0,0,0-16-16H56A16,16,0,0,0,40,56V200A16,16,0,0,0,56,216Z' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='40' y1='152' x2='216' y2='152' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='128' y1='40' x2='128' y2='12' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><circle cx='84' cy='184' r='12' stroke='currentColor' /><circle cx='172' cy='184' r='12' stroke='currentColor' /><line x1='80' y1='88' x2='176' y2='88' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/></svg>`,
+    BUS: `<svg viewBox='0 0 256 256'><rect width='256' height='256' fill='none'/><rect x='40' y='40' width='176' height='152' rx='16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='40' y1='136' x2='216' y2='136' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M80,192v24a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8V192' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M208,192v24a8,8,0,0,1-8,8H184a8,8,0,0,1-8-8V192' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><circle cx='80' cy='164' r='12' stroke='currentColor' /><circle cx='176' cy='164' r='12' stroke='currentColor' /><line x1='80' y1='80' x2='176' y2='80' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/></svg>`,
+    TROLLEYBUS: `<svg viewBox='0 0 256 256'><rect width='256' height='256' fill='none'/><rect x='40' y='72' width='176' height='144' rx='16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='40' y1='144' x2='216' y2='144' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='128' y1='72' x2='80' y2='16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='128' y1='72' x2='176' y2='16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><circle cx='80' cy='180' r='12' stroke='currentColor' /><circle cx='176' cy='180' r='12' stroke='currentColor' /></svg>`,
+    TRAIN: `<svg viewBox='0 0 256 256'><rect width='256' height='256' fill='none'/><path d='M12,136c0-64,48-88,116-88s116,24,116,88' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><rect x='16' y='160' width='224' height='48' rx='8' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M16,160l32-72' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M240,160l-32-72' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='104' y1='80' x2='152' y2='80' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/></svg>`,
+    OTHER: `<svg viewBox='0 0 256 256'><circle cx='128' cy='128' r='96' stroke='currentColor' stroke-miterlimit='10' /><polyline points='92 128 116 152 164 104' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/></svg>`
 };
-
 
 const TYPE_TO_ICON = { '0': ICONS.TRAM, '3': ICONS.BUS, '11': ICONS.TROLLEYBUS, '800': ICONS.TROLLEYBUS, '2': ICONS.TRAIN, '109': ICONS.TRAIN };
 
@@ -29,6 +23,8 @@ let currentDepartures = [];
 let routeMetadata = new Map();
 let selectedRoutes = new Set();
 let lastFetchedStop = '';
+let suggestionData = [];
+let suggestionIndex = -1;
 
 function formatUpdateTime() {
     const now = new Date();
@@ -42,14 +38,20 @@ function formatUpdateTime() {
     return `Actual for: ${days[now.getDay()]}, ${date}${suffix} of ${months[now.getMonth()]} ${now.getFullYear()}, ${now.toTimeString().split(' ')[0]}`;
 }
 
-async function fetchDepartures(stopName, updateHash = true) {
+function updateHash() {
+    const stop = encodeURIComponent(lastFetchedStop);
+    const routes = selectedRoutes.size > 0 ? `/${Array.from(selectedRoutes).join(',')}` : '';
+    window.location.hash = stop + routes;
+}
+
+async function fetchDepartures(stopName) {
     if (!stopName) return;
     const response = await fetch(`/api/departures?stop_name=${encodeURIComponent(stopName)}`);
     currentDepartures = await response.json();
     lastFetchedStop = stopName;
     clockEl.textContent = formatUpdateTime();
     updateBtn.style.display = 'inline';
-    if (updateHash) window.location.hash = encodeURIComponent(stopName);
+    updateHash();
     
     routeMetadata.clear();
     currentDepartures.forEach(d => { if (!routeMetadata.has(d.route)) routeMetadata.set(d.route, { color: d.color, text: d.text_color }); });
@@ -59,16 +61,51 @@ async function fetchDepartures(stopName, updateHash = true) {
 
 window.addEventListener('load', () => {
     if (window.location.hash) {
-        const stopName = decodeURIComponent(window.location.hash.substring(1));
+        const parts = window.location.hash.substring(1).split('/');
+        const stopName = decodeURIComponent(parts[0]);
+        if (parts[1]) {
+            parts[1].split(',').forEach(r => selectedRoutes.add(r));
+        }
         stopInput.value = stopName;
-        fetchDepartures(stopName, false);
+        fetchDepartures(stopName);
     }
 });
 
-updateBtn.onclick = (e) => {
-    e.preventDefault();
-    fetchDepartures(lastFetchedStop, false);
-};
+updateBtn.onclick = (e) => { e.preventDefault(); fetchDepartures(lastFetchedStop); };
+
+// --- Suggestions Keyboard Logic ---
+stopInput.addEventListener('keydown', (e) => {
+    if (suggestions.style.display === 'none') return;
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        suggestionIndex = Math.min(suggestionIndex + 1, suggestionData.length - 1);
+        highlightSuggestion();
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        suggestionIndex = Math.max(suggestionIndex - 1, -1);
+        highlightSuggestion();
+    } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (suggestionIndex >= 0) {
+            selectStop(suggestionData[suggestionIndex].name);
+        }
+    }
+});
+
+function highlightSuggestion() {
+    const items = suggestions.querySelectorAll('.suggestion-item');
+    items.forEach((item, idx) => {
+        item.classList.toggle('highlighted', idx === suggestionIndex);
+    });
+}
+
+function selectStop(name) {
+    stopInput.value = name;
+    suggestions.style.display = 'none';
+    selectedRoutes.clear();
+    fetchDepartures(name);
+}
 
 stopInput.addEventListener('input', () => {
     const query = stopInput.value.trim();
@@ -76,30 +113,26 @@ stopInput.addEventListener('input', () => {
     clearTimeout(window.debounceTimer);
     window.debounceTimer = setTimeout(async () => {
         const response = await fetch(`/api/stops?q=${encodeURIComponent(query)}`);
-        const data = await response.json();
-        renderSuggestions(data);
+        suggestionData = await response.json();
+        suggestionIndex = -1;
+        renderSuggestions();
     }, 300);
 });
 
-function renderSuggestions(stops) {
+function renderSuggestions() {
     suggestions.innerHTML = '';
-    if (stops.length === 0) { suggestions.style.display = 'none'; return; }
-    stops.forEach(stop => {
+    if (suggestionData.length === 0) { suggestions.style.display = 'none'; return; }
+    suggestionData.forEach((stop, idx) => {
         const div = document.createElement('div');
         div.className = 'suggestion-item';
         div.textContent = `${stop.name} (${stop.zone})`;
-        div.onclick = () => {
-            stopInput.value = stop.name;
-            suggestions.style.display = 'none';
-            selectedRoutes.clear();
-            fetchDepartures(stop.name);
-        };
+        div.onclick = () => selectStop(stop.name);
         suggestions.appendChild(div);
     });
     suggestions.style.display = 'block';
 }
 
-clearFilterBtn.onclick = () => { selectedRoutes.clear(); renderRoutePills(); renderBoard(); };
+clearFilterBtn.onclick = () => { selectedRoutes.clear(); updateHash(); renderRoutePills(); renderBoard(); };
 
 function renderRoutePills() {
     routePillsContainer.innerHTML = '';
@@ -117,6 +150,7 @@ function renderRoutePills() {
         pill.onclick = () => {
             if (selectedRoutes.has(route)) selectedRoutes.delete(route);
             else selectedRoutes.add(route);
+            updateHash();
             renderRoutePills();
             renderBoard();
         };
