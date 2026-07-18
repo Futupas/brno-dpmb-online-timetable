@@ -10,9 +10,14 @@ from flask import Flask, request, jsonify
 # =============================================================================
 
 TZ_NAME_CZECHIA = 'Europe/Prague'
-PORT_HTTP_SERVER = 5000
 HOURS_PER_DAY = 24
 MINUTES_PER_HOUR = 60
+
+# --- Server Constants ---
+# Set to True to allow access from other devices on your network (0.0.0.0)
+# Set to False to allow only local access (127.0.0.1)
+RUN_GLOBALLY = True 
+PORT_HTTP_SERVER = 5000
 
 # Max time in the future to show departures (2 hours)
 MAX_DEPARTURE_WINDOW_MINUTES = 120
@@ -175,4 +180,5 @@ def departures():
     return jsonify(final)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=PORT_HTTP_SERVER)
+    host_addr = '0.0.0.0' if RUN_GLOBALLY else '127.0.0.1'
+    app.run(debug=True, host=host_addr, port=PORT_HTTP_SERVER)
