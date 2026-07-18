@@ -17,7 +17,7 @@ COPY . .
 
 RUN chmod +x src/start.sh
 
-EXPOSE 5000
+EXPOSE 80
 
 WORKDIR /app/src
 

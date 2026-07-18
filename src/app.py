@@ -186,4 +186,4 @@ if __name__ == '__main__':
     if (os.environ.get('IS_DOCKER', 'False').lower() == 'true'): RUN_GLOBALLY = True
 
     host_addr = '0.0.0.0' if RUN_GLOBALLY else '127.0.0.1'
-    app.run(debug=True, host=host_addr, port=PORT_HTTP_SERVER)
+    app.run(debug=False, host=host_addr, port=PORT_HTTP_SERVER)
