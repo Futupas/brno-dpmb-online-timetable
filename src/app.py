@@ -43,12 +43,18 @@ FORMAT_DAY_NAME = '%A'
 FORMAT_ISO_TIME = '%Y-%m-%dT%H:%M:%S'
 
 # Paths
-DIR_PARENT = '..'
-DIR_DATA = 'data'
-FILE_DB_NAME = 'transit.db'
+# Points to the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+# Data directory is one level up from the script
+DIR_DATA = os.path.join(SCRIPT_DIR, '..', 'data')
+# Full path to the database file
+PATH_DB = os.path.join(DIR_DATA, 'transit.db')
+# Folder containing static assets
 DIR_STATIC = 'static'
+# The default file to serve for the root path
+FILE_DEFAULT = 'index.html'
 
-# API Keys
+# API Parameter Keys
 PARAM_STOP_NAME = 'stop_name'
 PARAM_SEARCH_QUERY = 'q'
 
@@ -57,12 +63,10 @@ PARAM_SEARCH_QUERY = 'q'
 # =============================================================================
 
 app = Flask(__name__, static_folder=DIR_STATIC, static_url_path='')
-script_dir = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(script_dir, DIR_PARENT, DIR_DATA, FILE_DB_NAME)
 czech_tz = ZoneInfo(TZ_NAME_CZECHIA)
 
 def get_db():
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(PATH_DB)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -79,14 +83,10 @@ def get_active_services(conn, target_date):
         elif row['exception_type'] == '2' and row['service_id'] in active: active.remove(row['service_id'])
     return active
 
-@app.route('/api/time')
-def get_server_time():
-    now = datetime.now(czech_tz)
-    return jsonify({
-        'iso': now.strftime(FORMAT_ISO_TIME),
-        'timestamp': int(now.timestamp()),
-        'timezone': TZ_NAME_CZECHIA
-    })
+@app.route('/')
+def index():
+    # Serves index.html at the root path without index.html appearing in the URL
+    return app.send_static_file(FILE_DEFAULT)
 
 @app.route('/api/stops')
 def stops():
@@ -94,7 +94,6 @@ def stops():
     if not q: return jsonify([])
     q_norm = unidecode(q).lower()
     conn = get_db()
-    # Now selecting zone_id to display in search
     cursor = conn.execute(
         'SELECT DISTINCT stop_name, zone_id FROM stops WHERE stop_name_normalized LIKE ? LIMIT 15', 
         ('%' + q_norm + '%',)
@@ -117,16 +116,9 @@ def departures():
     conn = get_db()
     all_raw = []
 
-    # Updated query to include route_type, color, and text_color
     query = '''
-        SELECT 
-            r.route_short_name, 
-            r.route_type, 
-            r.route_color, 
-            r.route_text_color, 
-            t.trip_headsign, 
-            st.departure_time, 
-            s.platform_code
+        SELECT r.route_short_name, r.route_type, r.route_color, r.route_text_color, 
+               t.trip_headsign, st.departure_time, s.platform_code
         FROM stops s
         JOIN stop_times st ON s.stop_id = st.stop_id
         JOIN trips t ON st.trip_id = t.trip_id
@@ -148,7 +140,6 @@ def departures():
             
             all_raw.append({
                 'route': row['route_short_name'],
-                'type_str': ROUTE_TYPE_MAP.get(row['route_type'], DEFAULT_TRANSIT_TYPE),
                 'type_code': row['route_type'],
                 'color': row['route_color'] or DEFAULT_ROUTE_COLOR,
                 'text_color': row['route_text_color'] or DEFAULT_TEXT_COLOR,
@@ -166,25 +157,19 @@ def departures():
 
     for d in all_raw:
         wait = d['abs_min'] - curr_abs_min
-        
-        # Filter: only in future AND within the time window
-        if wait < 0 or wait > MAX_DEPARTURE_WINDOW_MINUTES: 
-            continue
+        if wait < 0 or wait > MAX_DEPARTURE_WINDOW_MINUTES: continue
         
         key = (d['platform'], d['route'], d['headsign'])
         counts[key] = counts.get(key, 0) + 1
-        
         if counts[key] <= DEPARTURES_PER_ROUTE_LIMIT:
             final.append({
                 'platform': d['platform'],
                 'route': d['route'],
-                'type_str': d['type_str'],
                 'type_code': d['type_code'],
                 'color': d['color'],
                 'text_color': d['text_color'],
                 'headsign': d['headsign'],
-                'minutes_left': wait,
-                'time': d['time']
+                'minutes_left': wait
             })
 
     return jsonify(final)

@@ -11,11 +11,22 @@ body {
     margin: 0 auto;
 }
 
-.clock {
-    font-size: 14px;
+.status-bar {
+    font-size: 13px;
     color: #888;
     margin-bottom: 15px;
     text-align: center;
+}
+
+.update-link {
+    color: #ff9800;
+    text-decoration: none;
+    margin-left: 8px;
+    font-weight: bold;
+}
+
+.update-link:hover {
+    text-decoration: underline;
 }
 
 .search-section {
@@ -73,7 +84,6 @@ input[type='text'] {
     font-size: 14px;
     cursor: pointer;
     border: 1px solid transparent;
-    transition: background 0.2s;
 }
 
 .clear-btn {
@@ -111,43 +121,32 @@ input[type='text'] {
 
 .type-icon {
     margin-right: 10px;
-    font-size: 18px;
+    width: 24px;
+    height: 24px;
+    color: #888;
+}
+
+.type-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 16;
 }
 
 .headsign {
     flex-grow: 1;
     font-weight: 500;
-    padding-right: 10px;
 }
 
 .time {
     font-weight: bold;
     color: #ff9800;
     text-align: right;
-    min-width: 50px;
+    min-width: 60px;
 }
 
 .time-unit {
     font-size: 12px;
     color: #888;
-}
-
-.type-icon {
-    margin-right: 12px;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-}
-
-.type-icon svg {
-    width: 24px;
-    height: 24px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
 }
