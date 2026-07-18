@@ -14,6 +14,9 @@ PORT_HTTP_SERVER = 5000
 HOURS_PER_DAY = 24
 MINUTES_PER_HOUR = 60
 
+# Max time in the future to show departures (2 hours)
+MAX_DEPARTURE_WINDOW_MINUTES = 120
+
 # How many departures to show for the same route+headsign+platform combo
 DEPARTURES_PER_ROUTE_LIMIT = 2
 
@@ -29,6 +32,10 @@ ROUTE_TYPE_MAP = {
     '109': 'Suburban Railway'
 }
 DEFAULT_TRANSIT_TYPE = 'Other'
+
+# Default colors if missing in GTFS
+DEFAULT_ROUTE_COLOR = 'FFFFFF'
+DEFAULT_TEXT_COLOR = '000000'
 
 # Formatting
 FORMAT_DATE_GTFS = '%Y%m%d'
@@ -101,15 +108,21 @@ def departures():
     today = now_dt.date()
     yesterday = today - timedelta(days=1)
     
-    # Epoch: minutes from yesterday midnight
     curr_abs_min = (HOURS_PER_DAY * MINUTES_PER_HOUR) + (now_dt.hour * MINUTES_PER_HOUR) + now_dt.minute
 
     conn = get_db()
     all_raw = []
 
-    # SQL structure
+    # Updated query to include route_type, color, and text_color
     query = '''
-        SELECT r.route_short_name, r.route_type, t.trip_headsign, st.departure_time, s.platform_code
+        SELECT 
+            r.route_short_name, 
+            r.route_type, 
+            r.route_color, 
+            r.route_text_color, 
+            t.trip_headsign, 
+            st.departure_time, 
+            s.platform_code
         FROM stops s
         JOIN stop_times st ON s.stop_id = st.stop_id
         JOIN trips t ON st.trip_id = t.trip_id
@@ -117,25 +130,24 @@ def departures():
         WHERE s.stop_name = ? AND st.departure_time >= ? AND t.service_id IN ({})
     '''
 
-    # Fetch Yesterday (rollover) and Today
     for target_date, is_today in [(yesterday, False), (today, True)]:
         services = get_active_services(conn, target_date)
         if not services: continue
         
-        # If yesterday, we look for times >= 24:00. If today, we look for times >= current.
         search_time = f'{now_dt.hour:02d}:{now_dt.minute:02d}:00' if is_today else '24:00:00'
-        
         placeholders = ','.join(['?'] * len(services))
         cursor = conn.execute(query.format(placeholders), [stop_name, search_time] + list(services))
         
         for row in cursor.fetchall():
             h, m, _ = map(int, row['departure_time'].split(':'))
-            # Absolute minutes calculation
             abs_min = (h * MINUTES_PER_HOUR) + m + (0 if not is_today else HOURS_PER_DAY * MINUTES_PER_HOUR)
             
             all_raw.append({
                 'route': row['route_short_name'],
-                'type': ROUTE_TYPE_MAP.get(row['route_type'], DEFAULT_TRANSIT_TYPE),
+                'type_str': ROUTE_TYPE_MAP.get(row['route_type'], DEFAULT_TRANSIT_TYPE),
+                'type_code': row['route_type'],
+                'color': row['route_color'] or DEFAULT_ROUTE_COLOR,
+                'text_color': row['route_text_color'] or DEFAULT_TEXT_COLOR,
                 'headsign': row['trip_headsign'],
                 'platform': row['platform_code'] or 'N/A',
                 'abs_min': abs_min,
@@ -143,16 +155,17 @@ def departures():
             })
 
     conn.close()
-    
-    # Sort by time
     all_raw.sort(key=lambda x: x['abs_min'])
     
     final = []
-    counts = {} # Tracks (platform, route, headsign) occurrences
+    counts = {}
 
     for d in all_raw:
         wait = d['abs_min'] - curr_abs_min
-        if wait < 0: continue
+        
+        # Filter: only in future AND within the time window
+        if wait < 0 or wait > MAX_DEPARTURE_WINDOW_MINUTES: 
+            continue
         
         key = (d['platform'], d['route'], d['headsign'])
         counts[key] = counts.get(key, 0) + 1
@@ -161,7 +174,10 @@ def departures():
             final.append({
                 'platform': d['platform'],
                 'route': d['route'],
-                'type': d['type'],
+                'type_str': d['type_str'],
+                'type_code': d['type_code'],
+                'color': d['color'],
+                'text_color': d['text_color'],
                 'headsign': d['headsign'],
                 'minutes_left': wait,
                 'time': d['time']
