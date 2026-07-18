@@ -94,8 +94,12 @@ def stops():
     if not q: return jsonify([])
     q_norm = unidecode(q).lower()
     conn = get_db()
-    cursor = conn.execute('SELECT DISTINCT stop_name FROM stops WHERE stop_name_normalized LIKE ? LIMIT 15', ('%' + q_norm + '%',))
-    res = [row['stop_name'] for row in cursor.fetchall()]
+    # Now selecting zone_id to display in search
+    cursor = conn.execute(
+        'SELECT DISTINCT stop_name, zone_id FROM stops WHERE stop_name_normalized LIKE ? LIMIT 15', 
+        ('%' + q_norm + '%',)
+    )
+    res = [{'name': row['stop_name'], 'zone': row['zone_id']} for row in cursor.fetchall()]
     conn.close()
     return jsonify(res)
 

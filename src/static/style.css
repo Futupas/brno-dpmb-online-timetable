@@ -13,12 +13,12 @@ body {
 
 .search-section {
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 input[type='text'] {
     width: 100%;
-    padding: 15px;
+    padding: 12px;
     background: #1e1e1e;
     border: 1px solid #333;
     border-radius: 8px;
@@ -43,59 +43,93 @@ input[type='text'] {
     cursor: pointer;
 }
 
-.suggestion-item:last-child {
-    border-bottom: none;
+.filter-container {
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
 }
 
-.platform-group {
-    margin-bottom: 25px;
+.route-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.platform-header {
-    background: #2c2c2c;
-    padding: 5px 12px;
-    border-radius: 4px;
+.filter-pill {
+    padding: 6px 12px;
+    background: #333;
+    border-radius: 16px;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.filter-pill.active {
+    background: #ff9800;
+    color: #000;
     font-weight: bold;
-    margin-bottom: 10px;
-    display: inline-block;
+}
+
+.clear-btn {
+    background: #c62828;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 12px;
 }
 
 .departure-row {
     display: flex;
     align-items: center;
-    padding: 10px 0;
+    padding: 12px 0;
     border-bottom: 1px solid #222;
 }
 
+.route-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 12px;
+    width: 50px;
+}
+
 .route-pill {
-    width: 45px;
-    height: 30px;
+    width: 100%;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 4px;
     font-weight: bold;
-    margin-right: 12px;
     font-size: 14px;
-    flex-shrink: 0;
+}
+
+.platform-label {
+    font-size: 10px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.type-icon {
+    margin-right: 10px;
+    font-size: 18px;
 }
 
 .headsign {
     flex-grow: 1;
     font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .time {
     font-weight: bold;
     color: #ff9800;
-    margin-left: 10px;
 }
 
 .time-unit {
     font-size: 12px;
-    font-weight: normal;
     color: #888;
 }
