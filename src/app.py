@@ -9,25 +9,21 @@ from flask import Flask, request, jsonify
 # CONSTANTS & ENV VARIABLES
 # =============================================================================
 
-# Configurable via Environment Variables
 DEBUG_MODE = os.environ.get('DEBUG_MODE', 'False').lower() == 'true'
 RUN_GLOBALLY = os.environ.get('RUN_GLOBALLY', 'True').lower() == 'true'
 PORT_HTTP_SERVER = int(os.environ.get('PORT_HTTP_SERVER', 5000))
 
-# Time constants
 TZ_NAME_CZECHIA = 'Europe/Prague'
 HOURS_PER_DAY = 24
 MINUTES_PER_HOUR = 60
 MAX_DEPARTURE_WINDOW_MINUTES = 120
 DEPARTURES_PER_ROUTE_LIMIT = 2
 
-# Mapping GTFS route_type
 ROUTE_TYPE_MAP = {
     '0': 'Tram', '1': 'Subway', '2': 'Train', '3': 'Bus',
     '11': 'Trolleybus', '800': 'Trolleybus', '100': 'Rail', '109': 'Suburban Railway'
 }
 DEFAULT_TRANSIT_TYPE = 'Other'
-
 DEFAULT_ROUTE_COLOR = 'FFFFFF'
 DEFAULT_TEXT_COLOR = '000000'
 

@@ -11,6 +11,7 @@ const emptyStateEl = document.getElementById('emptyState');
 const routePillsContainer = document.getElementById('routePills');
 const clearFilterBtn = document.getElementById('clearFilter');
 const board = document.getElementById('board');
+const contentArea = document.getElementById('contentArea');
 
 const ICONS = {
     TRAM: `<svg viewBox='0 0 256 256'><rect width='256' height='256' fill='none'/><path d='M80,216l-32,16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M176,216l32,16' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><path d='M56,216H200a16,16,0,0,0,16-16V56a16,16,0,0,0-16-16H56A16,16,0,0,0,40,56V200A16,16,0,0,0,56,216Z' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='40' y1='152' x2='216' y2='152' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><line x1='128' y1='40' x2='128' y2='12' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/><circle cx='84' cy='184' r='12' stroke='currentColor' /><circle cx='172' cy='184' r='12' stroke='currentColor' /><line x1='80' y1='88' x2='176' y2='88' stroke='currentColor' stroke-linecap='round' stroke-linejoin='round'/></svg>`,
@@ -48,6 +49,11 @@ function updateHash() {
     window.location.hash = stop + routes;
 }
 
+function uncenterUI() {
+    contentArea.classList.remove('centered');
+    welcomeText.style.display = 'none';
+}
+
 function toggleFavorite() {
     if (!lastFetchedStop) return;
     if (favorites.includes(lastFetchedStop)) {
@@ -67,7 +73,7 @@ favBtn.onclick = toggleFavorite;
 async function fetchDepartures(stopName) {
     if (!stopName) return;
     
-    welcomeText.style.display = 'none';
+    uncenterUI();
     board.innerHTML = '';
     emptyStateEl.style.display = 'none';
     loadingEl.style.display = 'block';
@@ -144,8 +150,10 @@ function selectStop(name) {
 }
 
 stopInput.addEventListener('input', () => {
+    uncenterUI();
     const query = stopInput.value.trim();
     if (query.length < 2) { suggestions.style.display = 'none'; return; }
+    
     clearTimeout(window.debounceTimer);
     window.debounceTimer = setTimeout(async () => {
         const response = await fetch(`/api/stops?q=${encodeURIComponent(query)}`);
@@ -173,9 +181,9 @@ function renderSuggestions() {
         div.className = 'suggestion-item';
         
         const isFav = favorites.includes(stop.name);
-        const favIcon = isFav ? `<span class="fav-indicator">★</span> ` : '';
+        const favIcon = isFav ? `<span class="fav-indicator">★</span>` : '';
         
-        div.innerHTML = `<span>${favIcon}${stop.name} (${stop.zone})</span>`;
+        div.innerHTML = `<div>${favIcon} ${stop.name} <span style="color:var(--text-muted); font-size:12px;">(${stop.zone})</span></div>`;
         div.onclick = () => selectStop(stop.name);
         suggestions.appendChild(div);
     });
