@@ -283,10 +283,15 @@ function renderBoard() {
         row.className = 'departure-row';
         
         let delayHtml = '';
-        if (dep.delay_min > 0) {
-            delayHtml = `<span class='delay-badge delay-late'>+${dep.delay_min}</span>`;
-        } else if (dep.delay_min < 0) {
-            delayHtml = `<span class='delay-badge delay-early'>${dep.delay_min}</span>`;
+        if (dep.has_rt) {
+            if (dep.delay_min > 0) {
+                delayHtml = `<span class='delay-badge delay-late'>+${dep.delay_min}</span>`;
+            } else if (dep.delay_min < 0) {
+                delayHtml = `<span class='delay-badge delay-early'>${dep.delay_min}</span>`;
+            } else {
+                // Live data is active and delay is 0
+                delayHtml = `<span class='delay-badge delay-ontime'><span class='on-time-icon'>🕒</span>On time</span>`;
+            }
         }
 
         const wait = dep.minutes_left === 0 ? 'now' : `${dep.minutes_left}<span class='time-unit'>min</span>`;
@@ -296,7 +301,6 @@ function renderBoard() {
             <div class='route-container'><div class='route-pill' style='background-color: #${dep.color}; color: #${dep.text_color};'>${dep.route}</div></div>
             <div class='headsign'>${dep.headsign} ${dep.platform !== 'N/A' ? `(Pt. ${dep.platform})` : ''}</div>
             <div class='time'>${wait} ${delayHtml}</div>`;
-            
         board.appendChild(row);
     });
 }
