@@ -164,6 +164,12 @@ stopInput.addEventListener('input', () => {
         suggestions.style.display = 'none'; 
         return; 
     }
+
+    suggestions.innerHTML = `
+        <div class='suggestion-item loading-text'>
+            Searching<span class='dots'>...</span>
+        </div>`;
+    suggestions.style.display = 'block';
     
     clearTimeout(window.debounceTimer);
     window.debounceTimer = setTimeout(async () => {
@@ -308,7 +314,7 @@ function renderBoard() {
             }
         }
 
-        const platformHtml = dep.platform !== 'N/A' ? ` (Plat.&nbsp;${dep.platform})` : '';
+        const platformHtml = dep.platform !== 'N/A' ? ` (P.&nbsp;${dep.platform})` : '';
 
         const wait = dep.minutes_left === 0 ? 'now' : `${dep.minutes_left}<span class='time-unit'>min</span>`;
         
