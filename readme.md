@@ -2,6 +2,8 @@
 
 A minimalistic mobile-friendly departure board for public transport in Brno, Czechia. Enter a stop name to see upcoming departures, filter by specific routes, and bookmark your frequent stops.
 
+Availabne here: https://brno-dpmb-online-timetable.onrender.com
+
 ## Authorship & Acknowledgments
 - **Developer:** Futupas (Alex Pascal)
 - **AI Assistance:** System architecture and code logic generated with assistance from **Google Gemini**.
@@ -85,7 +87,8 @@ Licensed under the MIT License. See `license` file for details.
 ## ToDo
 * Get variables from `os.environ.get`
 * Save last used stops (on FE side)
-* Light theme
 * Description on the website
-* Real-time delays
+* loading
 * When no results (try bad route on the hash) - write that there are no results
+* Light theme
+* Real-time delays

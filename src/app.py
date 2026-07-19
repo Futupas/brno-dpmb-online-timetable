@@ -6,64 +6,40 @@ from unidecode import unidecode
 from flask import Flask, request, jsonify
 
 # =============================================================================
-# CONSTANTS
+# CONSTANTS & ENV VARIABLES
 # =============================================================================
 
-# Set to True to allow access from other devices on your network (0.0.0.0)
-# Set to False to allow only local access (127.0.0.1)
-RUN_GLOBALLY = False
-PORT_HTTP_SERVER = 5000
-FLASK_DEBUG_MODE = True
+# Configurable via Environment Variables
+DEBUG_MODE = os.environ.get('DEBUG_MODE', 'False').lower() == 'true'
+RUN_GLOBALLY = os.environ.get('RUN_GLOBALLY', 'True').lower() == 'true'
+PORT_HTTP_SERVER = int(os.environ.get('PORT_HTTP_SERVER', 5000))
 
-# Max time in the future to show departures (2 hours)
-MAX_DEPARTURE_WINDOW_MINUTES = 120
-
-# How many departures to show for the same route+headsign+platform combo
-DEPARTURES_PER_ROUTE_LIMIT = 2
-
-# =============================================================================
-# SYSTEM CONSTANTS
-# =============================================================================
-
+# Time constants
 TZ_NAME_CZECHIA = 'Europe/Prague'
 HOURS_PER_DAY = 24
 MINUTES_PER_HOUR = 60
+MAX_DEPARTURE_WINDOW_MINUTES = 120
+DEPARTURES_PER_ROUTE_LIMIT = 2
 
-# Mapping GTFS route_type to human readable strings
+# Mapping GTFS route_type
 ROUTE_TYPE_MAP = {
-    '0': 'Tram',
-    '1': 'Subway',
-    '2': 'Train',
-    '3': 'Bus',
-    '11': 'Trolleybus',
-    '800': 'Trolleybus',
-    '100': 'Rail',
-    '109': 'Suburban Railway'
+    '0': 'Tram', '1': 'Subway', '2': 'Train', '3': 'Bus',
+    '11': 'Trolleybus', '800': 'Trolleybus', '100': 'Rail', '109': 'Suburban Railway'
 }
 DEFAULT_TRANSIT_TYPE = 'Other'
 
-# Default colors if missing in GTFS
 DEFAULT_ROUTE_COLOR = 'FFFFFF'
 DEFAULT_TEXT_COLOR = '000000'
 
-# Formatting
 FORMAT_DATE_GTFS = '%Y%m%d'
 FORMAT_DAY_NAME = '%A'
-FORMAT_ISO_TIME = '%Y-%m-%dT%H:%M:%S'
 
-# Paths
-# Points to the directory where this script is located
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-# Data directory is one level up from the script
 DIR_DATA = os.path.join(SCRIPT_DIR, '..', 'data')
-# Full path to the database file
 PATH_DB = os.path.join(DIR_DATA, 'transit.db')
-# Folder containing static assets
 DIR_STATIC = 'static'
-# The default file to serve for the root path
 FILE_DEFAULT = 'index.html'
 
-# API Parameter Keys
 PARAM_STOP_NAME = 'stop_name'
 PARAM_SEARCH_QUERY = 'q'
 
@@ -94,7 +70,6 @@ def get_active_services(conn, target_date):
 
 @app.route('/')
 def index():
-    # Serves index.html at the root path without index.html appearing in the URL
     return app.send_static_file(FILE_DEFAULT)
 
 @app.route('/api/stops')
@@ -184,7 +159,6 @@ def departures():
     return jsonify(final)
 
 if __name__ == '__main__':
-    if (os.environ.get('IS_DOCKER', 'False').lower() == 'true'): RUN_GLOBALLY = True
-
-    host_addr = '0.0.0.0' if RUN_GLOBALLY else '127.0.0.1'
-    app.run(debug=FLASK_DEBUG_MODE, host=host_addr, port=PORT_HTTP_SERVER)
+    is_docker = os.environ.get('IS_DOCKER', 'False').lower() == 'true'
+    host_addr = '0.0.0.0' if (is_docker or RUN_GLOBALLY) else '127.0.0.1'
+    app.run(debug=DEBUG_MODE, host=host_addr, port=PORT_HTTP_SERVER)
