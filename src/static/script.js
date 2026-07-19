@@ -233,12 +233,22 @@ function renderBoard() {
     filtered.forEach(dep => {
         const row = document.createElement('div');
         row.className = 'departure-row';
+        
+        let delayHtml = '';
+        if (dep.delay_min > 0) {
+            delayHtml = `<span class='delay-badge delay-late'>+${dep.delay_min}</span>`;
+        } else if (dep.delay_min < 0) {
+            delayHtml = `<span class='delay-badge delay-early'>${dep.delay_min}</span>`;
+        }
+
         const wait = dep.minutes_left === 0 ? 'now' : `${dep.minutes_left}<span class='time-unit'>min</span>`;
+        
         row.innerHTML = `
             <div class='type-icon'>${TYPE_TO_ICON[dep.type_code] || ICONS.OTHER}</div>
             <div class='route-container'><div class='route-pill' style='background-color: #${dep.color}; color: #${dep.text_color};'>${dep.route}</div></div>
             <div class='headsign'>${dep.headsign} ${dep.platform !== 'N/A' ? `(Pt. ${dep.platform})` : ''}</div>
-            <div class='time'>${wait}</div>`;
+            <div class='time'>${wait} ${delayHtml}</div>`;
+            
         board.appendChild(row);
     });
 }

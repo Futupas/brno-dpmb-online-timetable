@@ -1,3 +1,5 @@
 flask
 pandas
 unidecode
+requests
+gtfs-realtime-bindings
