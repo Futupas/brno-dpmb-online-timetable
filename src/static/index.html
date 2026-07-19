@@ -20,7 +20,10 @@
 
             <div class='search-section'>
                 <div class='input-row'>
-                    <input type='text' id='stopInput' placeholder='Enter stop name...' autocomplete='off' />
+                    <div class='input-wrapper'>
+                        <input type='text' id='stopInput' placeholder='Enter stop name...' autocomplete='off' />
+                        <button id='clearInput' class='clear-input-btn' title='Clear search'>&times;</button>
+                    </div>
                 </div>
                 <div id='suggestions' class='suggestions'></div>
             </div>

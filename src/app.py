@@ -114,6 +114,7 @@ def departures():
     curr_abs_min = (HOURS_PER_DAY * MINUTES_PER_HOUR) + (now_dt.hour * MINUTES_PER_HOUR) + now_dt.minute
 
     live_delays = get_live_delays()
+    print(live_delays)
     
     conn = get_db()
     all_raw = []

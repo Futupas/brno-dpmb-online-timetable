@@ -175,3 +175,38 @@ input[type='text'] {
     margin-top: 20px;
     font-weight: 500;
 }
+
+/* ... existing styles ... */
+
+.input-wrapper {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+input[type='text'] {
+    width: 100%;
+    padding: 12px;
+    padding-right: 40px; /* Space for the clear button */
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.clear-input-btn {
+    position: absolute;
+    right: 10px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    display: none; /* Hidden by default */
+}
+
+.clear-input-btn:hover { color: var(--text-main); }
