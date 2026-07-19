@@ -2,4 +2,4 @@ flask
 pandas
 unidecode
 requests
-gtfs-realtime-bindings
+websocket-client

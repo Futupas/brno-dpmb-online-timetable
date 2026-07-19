@@ -69,6 +69,7 @@ def fetch_rt_delays():
         return rt_state['delays']
         
     try:
+        # Kordis feed requires no special headers, but let's be safe
         response = requests.get(GTFS_RT_URL, timeout=5)
         feed = gtfs_realtime_pb2.FeedMessage()
         feed.ParseFromString(response.content)
@@ -78,21 +79,27 @@ def fetch_rt_delays():
             if entity.HasField('trip_update'):
                 trip_id = entity.trip_update.trip.trip_id
                 
-                # Grab the latest available delay for this trip
-                delay_sec = 0
+                # Check for a trip-level delay (some feeds use this)
+                if entity.trip_update.HasField('delay'):
+                    new_delays[trip_id] = entity.trip_update.delay
+                    continue
+
+                # Otherwise, find the most relevant stop-time delay
+                # We take the first one that has a delay field set
                 for stu in entity.trip_update.stop_time_update:
-                    if stu.HasField('departure') and stu.departure.delay:
-                        delay_sec = stu.departure.delay
-                    elif stu.HasField('arrival') and stu.arrival.delay:
-                        delay_sec = stu.arrival.delay
-                
-                new_delays[trip_id] = delay_sec
+                    # Check departure first, then arrival
+                    if stu.HasField('departure') and stu.departure.HasField('delay'):
+                        new_delays[trip_id] = stu.departure.delay
+                        break # Found it, move to next trip
+                    if stu.HasField('arrival') and stu.arrival.HasField('delay'):
+                        new_delays[trip_id] = stu.arrival.delay
+                        break
                 
         rt_state['delays'] = new_delays
         rt_state['last_fetch'] = current_time
+        print(f"GTFS-RT: Updated. Found {len(new_delays)} active trip updates.")
     except Exception as e:
         print(f"Failed to fetch GTFS-RT: {e}")
-        # Keep old data if network fails
         
     return rt_state['delays']
 
