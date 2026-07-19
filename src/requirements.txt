@@ -3,3 +3,4 @@ pandas
 unidecode
 requests
 websocket-client
+gtfs-realtime-bindings
