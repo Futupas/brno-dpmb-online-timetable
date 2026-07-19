@@ -3,7 +3,6 @@
 const clockEl = document.getElementById('clock');
 const updateBtn = document.getElementById('updateBtn');
 const stopInput = document.getElementById('stopInput');
-const favBtn = document.getElementById('favBtn');
 const suggestions = document.getElementById('suggestions');
 const welcomeText = document.getElementById('welcomeText');
 const loadingEl = document.getElementById('loading');
@@ -54,21 +53,16 @@ function uncenterUI() {
     welcomeText.style.display = 'none';
 }
 
-function toggleFavorite() {
-    if (!lastFetchedStop) return;
-    if (favorites.includes(lastFetchedStop)) {
-        favorites = favorites.filter(f => f !== lastFetchedStop);
-        favBtn.textContent = '☆';
-        favBtn.classList.remove('active');
+function toggleFavorite(stopName, event) {
+    event.stopPropagation(); // Prevents the click from triggering selectStop()
+    if (favorites.includes(stopName)) {
+        favorites = favorites.filter(f => f !== stopName);
     } else {
-        favorites.push(lastFetchedStop);
-        favBtn.textContent = '★';
-        favBtn.classList.add('active');
+        favorites.push(stopName);
     }
     localStorage.setItem('brno_favorites', JSON.stringify(favorites));
+    sortAndRenderSuggestions();
 }
-
-favBtn.onclick = toggleFavorite;
 
 async function fetchDepartures(stopName) {
     if (!stopName) return;
@@ -85,15 +79,6 @@ async function fetchDepartures(stopName) {
     lastFetchedStop = stopName;
     clockEl.textContent = formatUpdateTime();
     updateBtn.style.display = 'inline';
-    
-    favBtn.style.display = 'flex';
-    if (favorites.includes(stopName)) {
-        favBtn.textContent = '★';
-        favBtn.classList.add('active');
-    } else {
-        favBtn.textContent = '☆';
-        favBtn.classList.remove('active');
-    }
 
     updateHash();
     
@@ -157,33 +142,47 @@ stopInput.addEventListener('input', () => {
     clearTimeout(window.debounceTimer);
     window.debounceTimer = setTimeout(async () => {
         const response = await fetch(`/api/stops?q=${encodeURIComponent(query)}`);
-        const rawStops = await response.json();
-        
-        // Sort favorites to the top
-        suggestionData = rawStops.sort((a, b) => {
-            const aFav = favorites.includes(a.name);
-            const bFav = favorites.includes(b.name);
-            if (aFav && !bFav) return -1;
-            if (!aFav && bFav) return 1;
-            return 0;
-        });
-
-        suggestionIndex = -1;
-        renderSuggestions();
+        suggestionData = await response.json();
+        sortAndRenderSuggestions();
     }, 300);
 });
+
+function sortAndRenderSuggestions() {
+    // Sort favorites to the top
+    suggestionData.sort((a, b) => {
+        const aFav = favorites.includes(a.name);
+        const bFav = favorites.includes(b.name);
+        if (aFav && !bFav) return -1;
+        if (!aFav && bFav) return 1;
+        return 0;
+    });
+
+    suggestionIndex = -1;
+    renderSuggestions();
+}
 
 function renderSuggestions() {
     suggestions.innerHTML = '';
     if (suggestionData.length === 0) { suggestions.style.display = 'none'; return; }
+    
     suggestionData.forEach((stop) => {
         const div = document.createElement('div');
         div.className = 'suggestion-item';
         
         const isFav = favorites.includes(stop.name);
-        const favIcon = isFav ? `<span class="fav-indicator">★</span>` : '';
         
-        div.innerHTML = `<div>${favIcon} ${stop.name} <span style="color:var(--text-muted); font-size:12px;">(${stop.zone})</span></div>`;
+        const textDiv = document.createElement('div');
+        textDiv.innerHTML = `${stop.name} <span style="color:var(--text-muted); font-size:12px;">(${stop.zone})</span>`;
+        
+        const starDiv = document.createElement('div');
+        starDiv.className = isFav ? 'fav-star active' : 'fav-star';
+        starDiv.textContent = isFav ? '★' : '☆';
+        starDiv.title = 'Toggle favorite';
+        starDiv.onclick = (e) => toggleFavorite(stop.name, e);
+
+        div.appendChild(textDiv);
+        div.appendChild(starDiv);
+        
         div.onclick = () => selectStop(stop.name);
         suggestions.appendChild(div);
     });
