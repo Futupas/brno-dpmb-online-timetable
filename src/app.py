@@ -94,6 +94,7 @@ def index(): return app.send_static_file('index.html')
 
 @app.route('/api/stops')
 def stops():
+    time.sleep(2)
     q = request.args.get('q', '')
     if not q: return jsonify([])
     conn = sqlite3.connect(PATH_DB)
@@ -105,6 +106,7 @@ def stops():
 
 @app.route('/api/departures')
 def departures():
+    time.sleep(2)
     stop_name = request.args.get('stop_name')
     if not stop_name: return jsonify({'error': 'missing stop_name'}), 400
 
