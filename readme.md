@@ -76,39 +76,17 @@ Access at `http://localhost:5000`.
    ```
 
 ## Sources
-- **GTFS Data:** [Brno Data - GTFS](https://data.brno.cz/datasets/379d2e9a7907460c8ca7fda1f3e84328/about)
-- **Stops Data:** [Brno Data - Public Transport Stops](https://data.brno.cz/datasets/747a824783044377b6d07a8060e7769d_0/explore) - OBSOLETE
 
-All datasets can be found on [data.brno.cz](https://data.brno.cz/search?q=mhd%20gtfs).
+* [GTFS static data (including stops)](https://kordis-jmk.cz/gtfs/gtfs.zip) - Needs to be updated every week (Sunday 12:00)
+* [GTFS real-time data](https://kordis-jmk.cz/gtfs/gtfsReal.dat)
+* [WS for real-time delays](https://gis.brno.cz/ags4/rest/services/stream_kordis_26/StreamServer/subscribe)
+
+## Useful links
+
+* https://www.arcgis.com/home/item.html?id=e8aa121910df41bb9a28e4ca34a263c7#overview
+* https://www.arcgis.com/apps/mapviewer/index.html?url=https://gis.brno.cz/ags4/rest/services/stream_kordis_26/StreamServer&source=sd
+* https://data.brno.cz/datasets/mestobrno::polohy-vozidel-hromadn%C3%A9-dopravy-public-transit-positional-data/about
+* https://data.brno.cz/datasets/j%C3%ADzdn%C3%AD-%C5%99%C3%A1d-ids-jmk-ve-form%C3%A1tu-gtfs-gtfs-timetable-data/about
 
 ## License
 Licensed under the MIT License. See `license` file for details.
-
-## ToDo
-* Real-time delays
-
-# Pomoika
-
-Delays: 
-https://data.brno.cz/datasets/mestobrno::polohy-vozidel-hromadn%C3%A9-dopravy-public-transit-positional-data/about
-https://www.arcgis.com/home/item.html?id=e8aa121910df41bb9a28e4ca34a263c7#overview
-https://gis.brno.cz/ags4/rest/services/stream_kordis_26/StreamServer/subscribe
-
-GTFS
-https://data.brno.cz/datasets/j%C3%ADzdn%C3%AD-%C5%99%C3%A1d-ids-jmk-ve-form%C3%A1tu-gtfs-gtfs-timetable-data/about
-https://kordis-jmk.cz/gtfs/gtfs.zip
-
-
-https://www.idsjmk.cz/traffic-state/links
-https://www.arcgis.com/apps/mapviewer/index.html?url=https://gis.brno.cz/ags4/rest/services/stream_kordis_26/StreamServer&source=sd
-https://www.arcgis.com/home/item.html?id=e8aa121910df41bb9a28e4ca34a263c7#overview
-https://gis.brno.cz/ags4/rest/services/stream_kordis_26/StreamServer/subscribe
-https://data.brno.cz/datasets/mestobrno::polohy-vozidel-hromadn%C3%A9-dopravy-public-transit-positional-data/about
-
-
-trasy linek
-https://data.brno.cz/search?q=trasy%20linek
-https://data.brno.cz/datasets/mestobrno::trasy-linek-ids-jmk-public-transport-routes/about
-
-
-GTFS should be updated every week on sunday!!
