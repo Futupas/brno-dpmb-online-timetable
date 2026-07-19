@@ -79,10 +79,17 @@ Access at `http://localhost:5000`.
 - **GTFS Data:** [Brno Data - GTFS](https://data.brno.cz/datasets/379d2e9a7907460c8ca7fda1f3e84328/about)
 - **Stops Data:** [Brno Data - Public Transport Stops](https://data.brno.cz/datasets/747a824783044377b6d07a8060e7769d_0/explore)
 
-All datasets can be found on [data.brno.cz](https://data.brno.cz/search?collection=dataset&q=mhd).
+All datasets can be found on [data.brno.cz](https://data.brno.cz/search?q=mhd%20gtfs).
 
 ## License
 Licensed under the MIT License. See `license` file for details.
 
 ## ToDo
 * Real-time delays
+
+# Pomoika
+
+Delays: 
+https://data.brno.cz/datasets/mestobrno::polohy-vozidel-hromadn%C3%A9-dopravy-public-transit-positional-data/about
+https://www.arcgis.com/home/item.html?id=e8aa121910df41bb9a28e4ca34a263c7#overview
+https://gis.brno.cz/ags4/rest/services/stream_kordis_26/StreamServer/subscribe
