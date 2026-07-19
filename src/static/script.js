@@ -7,6 +7,7 @@ const suggestions = document.getElementById('suggestions');
 const welcomeText = document.getElementById('welcomeText');
 const loadingEl = document.getElementById('loading');
 const emptyStateEl = document.getElementById('emptyState');
+const errorStateEl = document.getElementById('errorState'); // NEW
 const routePillsContainer = document.getElementById('routePills');
 const clearFilterBtn = document.getElementById('clearFilter');
 const board = document.getElementById('board');
@@ -70,23 +71,41 @@ async function fetchDepartures(stopName) {
     uncenterUI();
     board.innerHTML = '';
     emptyStateEl.style.display = 'none';
+    errorStateEl.style.display = 'none'; // Reset error state
     loadingEl.style.display = 'block';
 
-    const response = await fetch(`/api/departures?stop_name=${encodeURIComponent(stopName)}`);
-    currentDepartures = await response.json();
-    
-    loadingEl.style.display = 'none';
-    lastFetchedStop = stopName;
-    clockEl.textContent = formatUpdateTime();
-    updateBtn.style.display = 'inline';
+    try {
+        const response = await fetch(`/api/departures?stop_name=${encodeURIComponent(stopName)}`);
+        
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || `Server responded with ${response.status}`);
+        }
 
-    updateHash();
-    
-    routeMetadata.clear();
-    currentDepartures.forEach(d => { if (!routeMetadata.has(d.route)) routeMetadata.set(d.route, { color: d.color, text: d.text_color }); });
-    renderRoutePills();
-    renderBoard();
+        currentDepartures = await response.json();
+        
+        loadingEl.style.display = 'none';
+        lastFetchedStop = stopName;
+        clockEl.textContent = formatUpdateTime();
+        updateBtn.style.display = 'inline';
+
+        updateHash();
+        
+        routeMetadata.clear();
+        currentDepartures.forEach(d => { 
+            if (!routeMetadata.has(d.route)) routeMetadata.set(d.route, { color: d.color, text: d.text_color }); 
+        });
+        renderRoutePills();
+        renderBoard();
+
+    } catch (err) {
+        loadingEl.style.display = 'none';
+        errorStateEl.textContent = `Error: ${err.message}`;
+        errorStateEl.style.display = 'block';
+        console.error('Fetch error:', err);
+    }
 }
+
 
 window.addEventListener('load', () => {
     if (window.location.hash) {
