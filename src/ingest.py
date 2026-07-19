@@ -11,12 +11,11 @@ import sys
 # Relative paths
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, '..', 'data')
-GTFS_DIR = os.path.join(DATA_DIR, 'GTFS')
+GTFS_DIR = os.path.join(DATA_DIR, 'gtfs')
 DB_PATH = os.path.join(DATA_DIR, 'transit.db')
-STOPS_FILE = os.path.join(DATA_DIR, 'stops.csv')
 
 # IDS JMK Zone IDs for Brno city
-BRNO_ZONE_IDS = ['100', '101']
+BRNO_ZONE_IDS = ['100', '101', '570']
 
 # Padding length for HH:MM:SS
 GTFS_TIME_LEN = 8
@@ -30,16 +29,12 @@ def ingest():
     if not os.path.exists(GTFS_DIR):
         print('Error: GTFS directory not found: ' + GTFS_DIR)
         sys.exit(1)
-        
-    if not os.path.exists(STOPS_FILE):
-        print('Error: Stops file not found: ' + STOPS_FILE)
-        sys.exit(1)
 
     os.makedirs(DATA_DIR, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
 
     print('Loading and filtering Brno stops...')
-    stops = pd.read_csv(STOPS_FILE, dtype=str)
+    stops = pd.read_csv(os.path.join(GTFS_DIR, 'stops.txt'), dtype=str)
     # Only keep stops belonging to Brno city zones
     brno_stops = stops[stops['zone_id'].isin(BRNO_ZONE_IDS)].copy()
     brno_stops['stop_name_normalized'] = brno_stops['stop_name'].apply(normalize_string)

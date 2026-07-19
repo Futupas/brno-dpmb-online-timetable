@@ -50,6 +50,20 @@ def on_message(ws, message):
     try:
         data = json.loads(message)
         attr = data.get('attributes', {})
+
+        # if attr.get('VType') == 0: return # This is not a passenger ride: https://data.brno.cz/datasets/mestobrno::polohy-vozidel-hromadn%C3%A9-dopravy-public-transit-positional-data/about
+
+        if attr.get('VType') != 0: return # temporary
+
+
+        print('message starts')
+        # print(data.get('geometry'))
+        # print(data.get('attributes'))
+        print(message)
+        print('message ends')
+        print()
+        return
+
         course = attr.get('Course')
         delay = attr.get('Delay')
         
@@ -65,7 +79,7 @@ def on_message(ws, message):
 
             if delay > 0:
                 s, r, d = get_transit_info(attr.get('LineID'), attr.get('LastStopID'), attr.get('FinalStopID'))
-                if s: print(f'Stop: {s}, Route: {r}, Destination: {d}, Delay: {delay}min')
+                if s: print(f'Stop: {s}, Route: {r}, Destination: {d}, Delay: {delay}min, attrs: {attr}\n')
     except Exception as e:
         print(f'Parse Error: {e}')
 
