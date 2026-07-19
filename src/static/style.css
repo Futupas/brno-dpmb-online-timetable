@@ -234,3 +234,10 @@ input[type='text'] {
     color: #ff5252;
     background: rgba(255, 82, 82, 0.1);
 }
+
+.suggestion-item.loading-text {
+    color: var(--text-muted);
+    font-style: italic;
+    cursor: default;
+    justify-content: center;
+}

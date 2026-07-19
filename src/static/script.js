@@ -68,13 +68,16 @@ function toggleFavorite(stopName, event) {
 
 async function fetchDepartures(stopName) {
     if (!stopName) return;
+    
     clearInputBtn.style.display = 'block';
-
     uncenterUI();
     board.innerHTML = '';
     emptyStateEl.style.display = 'none';
-    errorStateEl.style.display = 'none'; // Reset error state
+    errorStateEl.style.display = 'none';
     loadingEl.style.display = 'block';
+
+    const filterContainer = document.getElementById('filterContainer');
+    filterContainer.style.visibility = 'hidden';
 
     try {
         const response = await fetch(`/api/departures?stop_name=${encodeURIComponent(stopName)}`);
@@ -97,14 +100,16 @@ async function fetchDepartures(stopName) {
         currentDepartures.forEach(d => { 
             if (!routeMetadata.has(d.route)) routeMetadata.set(d.route, { color: d.color, text: d.text_color }); 
         });
+
         renderRoutePills();
         renderBoard();
 
+        filterContainer.style.visibility = 'visible';
     } catch (err) {
         loadingEl.style.display = 'none';
+        filterContainer.style.visibility = 'hidden'; // Keep hidden on error
         errorStateEl.textContent = `Error: ${err.message}`;
         errorStateEl.style.display = 'block';
-        console.error('Fetch error:', err);
     }
 }
 
@@ -185,7 +190,17 @@ function selectStop(name) {
 stopInput.addEventListener('input', () => {
     uncenterUI();
     const query = stopInput.value.trim();
-    if (query.length < 2) { suggestions.style.display = 'none'; return; }
+    
+    clearInputBtn.style.display = query.length > 0 ? 'block' : 'none';
+
+    if (query.length < 2) { 
+        suggestions.style.display = 'none'; 
+        return; 
+    }
+
+    // Requirement 1: Show loading in suggestions immediately
+    suggestions.innerHTML = `<div class='suggestion-item loading-text'>Searching<span class='dots'>...</span></div>`;
+    suggestions.style.display = 'block';
     
     clearTimeout(window.debounceTimer);
     window.debounceTimer = setTimeout(async () => {
@@ -289,18 +304,24 @@ function renderBoard() {
             } else if (dep.delay_min < 0) {
                 delayHtml = `<span class='delay-badge delay-early'>${dep.delay_min}</span>`;
             } else {
-                // Live data is active and delay is 0
                 delayHtml = `<span class='delay-badge delay-ontime'><span class='on-time-icon'>🕒</span>On time</span>`;
             }
         }
+
+        const platformHtml = dep.platform !== 'N/A' ? ` (Plat.&nbsp;${dep.platform})` : '';
 
         const wait = dep.minutes_left === 0 ? 'now' : `${dep.minutes_left}<span class='time-unit'>min</span>`;
         
         row.innerHTML = `
             <div class='type-icon'>${TYPE_TO_ICON[dep.type_code] || ICONS.OTHER}</div>
-            <div class='route-container'><div class='route-pill' style='background-color: #${dep.color}; color: #${dep.text_color};'>${dep.route}</div></div>
-            <div class='headsign'>${dep.headsign} ${dep.platform !== 'N/A' ? `(Pt. ${dep.platform})` : ''}</div>
-            <div class='time'>${wait} ${delayHtml}</div>`;
+            <div class='route-container'>
+                <div class='route-pill' style='background-color: #${dep.color}; color: #${dep.text_color};'>
+                    ${dep.route}
+                </div>
+            </div>
+            <div class='headsign'>${dep.headsign}${platformHtml}</div>
+            <div class='time'>${wait}${delayHtml}</div>`;
+            
         board.appendChild(row);
     });
 }

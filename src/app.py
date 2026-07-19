@@ -105,6 +105,7 @@ def stops():
 
 @app.route('/api/departures')
 def departures():
+    time.sleep(2)
     stop_name = request.args.get('stop_name')
     if not stop_name: return jsonify({'error': 'missing stop_name'}), 400
 
