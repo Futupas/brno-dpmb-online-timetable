@@ -51,6 +51,7 @@ def on_message(ws, message):
         # Extract all requested extra data
         payload = {
             'delay': float(attr.get('Delay', 0)),
+            'updated_at': attr.get('TimeUpdated', 0) / 1000.0,  # Convert ms to seconds
             # 'last_stop': attr.get('LastStopID'),
             # 'final_stop': attr.get('FinalStopID'),
             # 'line_id': attr.get('LineID'),
