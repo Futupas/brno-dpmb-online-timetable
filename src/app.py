@@ -8,6 +8,8 @@ from zoneinfo import ZoneInfo
 from unidecode import unidecode
 from flask import Flask, request, jsonify
 from google.transit import gtfs_realtime_pb2
+from ingest import ingest
+import time
 
 # =============================================================================
 # CONSTANTS & ENV
@@ -24,6 +26,9 @@ DEPARTURES_PER_ROUTE_LIMIT = 2
 
 GTFS_RT_BINARY_URL = 'https://kordis-jmk.cz/gtfs/gtfsReal.dat'
 RT_BINARY_CACHE_TTL = 30
+
+# Maximum age of real-time data before it's considered "stale" (10 minutes)
+MAX_RT_AGE_SECONDS = 60 * 10
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DIR_DATA = os.path.join(SCRIPT_DIR, '..', 'data')
@@ -138,8 +143,18 @@ def departures():
             
             # Access the nested 'delay' key
             v_data = label_to_delay.get(v_label) if v_label else None
-            delay_min = int(v_data['delay']) if v_data else 0
-            has_rt = v_data is not None
+            delay_min = 0
+            has_rt = False
+
+            if v_data:
+                # Calculate how many seconds ago this vehicle was updated
+                age = time.time() - v_data.get('updated_at', 0)
+                
+                if age < MAX_RT_AGE_SECONDS:
+                    delay_min = int(v_data['delay'])
+                    has_rt = True
+                elif DEBUG_MODE:
+                    print(f"DEBUG: Ignoring stale RT data for {v_label} (Age: {round(age)}s)")
 
             h, m, _ = map(int, row['departure_time'].split(':'))
             sch_min = (h * MINUTES_PER_HOUR) + m + (0 if not is_today else HOURS_PER_DAY * MINUTES_PER_HOUR)
@@ -184,5 +199,8 @@ def departures():
     return jsonify(final)
 
 if __name__ == '__main__':
+    if not os.path.exists(PATH_DB):
+        print('Database not found. Starting automatic ingestion...')
+        ingest()
     host = '0.0.0.0' if (IS_DOCKER or RUN_GLOBALLY) else '127.0.0.1'
     app.run(debug=DEBUG_MODE, host=host, port=PORT_HTTP_SERVER)
