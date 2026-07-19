@@ -10,7 +10,6 @@ ENV IS_DOCKER=True
 WORKDIR /app
 
 COPY src/requirements.txt .
-# Append tzdata to requirements only for the Docker build
 RUN echo "tzdata" >> requirements.txt && pip install --no-cache-dir -r requirements.txt
 
 COPY . .

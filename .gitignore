@@ -2,3 +2,5 @@
 Pipfile
 Pipfile.lock
 __pycache__
+data/live_delays.json
+*.tmp

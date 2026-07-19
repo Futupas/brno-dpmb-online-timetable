@@ -6,4 +6,10 @@ services:
       - '80:80'
     volumes:
       - ./data:/app/data
+    environment:
+      - IS_DOCKER=True
+      - DEBUG_MODE=False
+      - RUN_GLOBALLY=True
+      - PORT_HTTP_SERVER=5000
     restart: unless-stopped
+  
