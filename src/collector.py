@@ -51,9 +51,9 @@ def on_message(ws, message):
         # Extract all requested extra data
         payload = {
             'delay': float(attr.get('Delay', 0)),
-            'last_stop': attr.get('LastStopID'),
-            'final_stop': attr.get('FinalStopID'),
-            'line_id': attr.get('LineID'),
+            # 'last_stop': attr.get('LastStopID'),
+            # 'final_stop': attr.get('FinalStopID'),
+            # 'line_id': attr.get('LineID'),
             'wkid': geom.get('spatialReference', {}).get('wkid')
         }
 
