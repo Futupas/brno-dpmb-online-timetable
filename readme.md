@@ -95,7 +95,10 @@ pipenv install tzdata
 ## Useful links
 *   [ArcGIS StreamServer Overview](https://www.arcgis.com/home/item.html?id=e8aa121910df41bb9a28e4ca34a263c7#overview)
 *   [Brno Data - Vehicle Positions](https://data.brno.cz/datasets/mestobrno::polohy-vozidel-hromadn%C3%A9-dopravy-public-transit-positional-data/about)
-*   [Brno Data - GTFS Timetables](https://data.brno.cz/datasets/j%C3%ADzdn%C3%AD-%C5%99%C3%A1d-ids-jmk-ve-form%C3%A1tu-gtfs-gtfs-timetable-data/about)
+*   [Brno Data - GTFS Timetables](https://data.brno.cz/datasets/jízdní-řád-ids-jmk-ve-formátu-gtfs-gtfs-timetable-data/about)
+
+## ToDo
+* Better icons for tram/bus/trolleybus etc
 
 ## License
 Licensed under the MIT License. See `license` file for details.
